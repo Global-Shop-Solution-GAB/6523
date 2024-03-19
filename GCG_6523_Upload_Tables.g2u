@@ -1,0 +1,140 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.Form..Create
+Gui.Form..Caption("Please select a file to process")
+Gui.Form..Size(7470,1155)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..BackColor(-2147483633)
+Gui.Form..MousePointer(0)
+Gui.Form..Sizeable(False)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.cmdFile.Create(Button)
+Gui.Form.cmdFile.Size(420,345)
+Gui.Form.cmdFile.Position(6900,60)
+Gui.Form.cmdFile.Caption("^")
+Gui.Form.cmdFile.Event(Click,cmdFile_Click)
+Gui.Form.txtFilePath.Create(TextBox,"",True,6735,300,0,90,75,True,0,"Arial",8,-2147483643,1)
+Gui.Form.cmdProcess.Create(Button)
+Gui.Form.cmdProcess.Size(855,375)
+Gui.Form.cmdProcess.Position(2835,405)
+Gui.Form.cmdProcess.Caption("Process")
+Gui.Form.cmdProcess.Event(Click,cmdProcess_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+f.ODBC.Connection!con.OpenCompanyConnection
+gui.Form..Show
+Program.Sub.Main.End
+
+Program.Sub.cmdProcess_Click.Start
+f.Intrinsic.Control.Try
+v.Local.sError.Declare
+v.Local.sFile.Declare
+V.Local.sCol.Declare
+V.Local.i.Declare
+V.Local.iRow.Declare
+V.Local.sRow.Declare
+v.Local.iWorksheet.Declare
+v.Local.iCnt.Declare
+V.Local.sWSNames.Declare
+v.Local.sTable.Declare
+v.Local.sSQL.Declare
+f.Intrinsic.UI.InvokeWaitDialog("Updating data...","Please wait")
+gui.Form..Enabled(false)
+V.Local.sFile.set(V.Screen.Form!txtFilePath.Text)
+
+f.Data.Datatable.Create("dtSP_Territories")
+f.Data.DataTable.AddColumn("dtSP_Territories","VENDOR","String")
+f.Data.DataTable.AddColumn("dtSP_Territories","VENDOR_NAME","String")
+f.Data.DataTable.AddColumn("dtSP_Territories","SALESPERSON","String")
+f.Data.DataTable.AddColumn("dtSP_Territories","SP_NAME","String")
+
+F.Automation.MSExcel.CreateAppObject("MSExcel")
+F.Automation.MSExcel.OpenWorkbook("MSExcel","Workbook",V.Local.sFile)
+f.Automation.MSExcel.GetWorksheetCount("Workbook",v.Local.iWorksheet)
+
+Function.Automation.MSExcel.EnumerateWorksheets("Workbook",V.Local.sWSNames)
+f.Intrinsic.String.Split(v.Local.sWSNames,"*!*",v.Local.sWSNames)
+
+f.Intrinsic.Control.For(v.Local.iCnt,0,v.Local.sWSNames.UBound,1)
+
+	f.Intrinsic.Math.Add(v.Local.iCnt,1,v.Local.iCnt)
+	F.Automation.MSExcel.OpenWorksheet("Workbook","Worksheet",v.Local.iCnt)
+	F.Automation.MSExcel.RowCount("Worksheet",V.Local.iRow)
+	F.Intrinsic.String.Split(V.Local.sFile,"$!$",V.Local.sRow)
+	f.Intrinsic.Math.Sub(v.Local.iCnt,1,v.Local.iCnt)
+	F.Intrinsic.Control.For(V.Local.i,2,V.Local.iRow,1)
+		Function.Automation.MSExcel.ReadRow("Worksheet",V.Local.i,1,4,V.Local.sRow)
+		F.Intrinsic.String.Split(V.Local.sRow,"*!*",V.Local.sCol)
+		f.Intrinsic.Control.If(V.Local.sCol(0).trim,<>,"",and,V.Local.sCol(1).trim,<>,"",V.Local.sCol(2).trim,<>,"",V.Local.sCol(3).trim,<>,"")
+			f.Data.Datatable.AddRow("dtSP_Territories","VENDOR",V.Local.sCol(0),"VENDOR_NAME",V.Local.sCol(1),"SALESPERSON",V.Local.sCol(2),"SP_NAME",V.Local.sCol(3))
+		f.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Next(V.Local.i)
+	F.ODBC.Connection!con.Execute("delete from GCG_6523_SP_TERRITORIES")
+	F.Data.DataTable.SaveToDB("dtSP_Territories","con","GCG_6523_SP_TERRITORIES","","128","VENDOR@!@VENDOR*!*VENDOR_NAME@!@VENDOR_NAME*!*SALESPERSON@!@SALESPERSON*!*SP_NAME@!@SP_NAME")
+	
+	f.Data.Datatable.DeleteRow("dtSP_Territories")
+	Function.Automation.Generic.DestroyObject("Worksheet")
+f.Intrinsic.Control.Next(v.Local.iCnt)
+
+	Function.Automation.Generic.DestroyObject("Workbook")
+	Function.Automation.Generic.DestroyObject("MSExcel")
+	f.Intrinsic.UI.CloseWaitDialog
+	f.Intrinsic.UI.Msgbox("Upload done successfully.","Notification!")
+	f.Intrinsic.Control.CallSub(Form_UnLoad)
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Subroutine called from:{6}{1}Error Occurred: {3}{1}Description: {4}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,v.Ambient.SubroutineCalledFrom,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(Form_UnLoad)
+	F.Intrinsic.Control.End	
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdProcess_Click.End
+
+Program.Sub.cmdFile_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.sError.Declare
+
+V.Local.sFile.Declare(String)
+
+F.Intrinsic.UI.ShowOpenFileDialog("","xls|*.xlsx|*.xls",,V.Local.sFile)
+F.Intrinsic.Control.If(V.Local.sFile,=,"***CANCEL***")
+	F.Intrinsic.Control.End
+
+F.Intrinsic.Control.EndIf
+Gui.Form.txtFilePath.Text(V.Local.sFile)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Subroutine called from:{6}{1}Error Occurred: {3}{1}Description: {4}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,v.Ambient.SubroutineCalledFrom,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(Form_UnLoad)
+	F.Intrinsic.Control.End	
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdFile_Click.End
+
+Program.Sub.Form_UnLoad.Start
+f.Intrinsic.Control.Try
+	v.Local.sError.Declare
+
+	F.Intrinsic.Control.If(V.ODBC.con.State,=,1)
+		F.ODBC.Connection!con.close
+	F.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.End
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Subroutine called from:{6}{1}Error Occurred: {3}{1}Description: {4}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,v.Ambient.SubroutineCalledFrom,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End	
+F.Intrinsic.Control.EndTry
+Program.Sub.Form_UnLoad.End
+
+Program.Sub.Comments.Start
+${$5$}$2.0.0.0$}$2
+${$6$}$bpham$}$20211214093816366$}$Di0riF4Q5RIv6jxva5zSWDOOsXP37Nso+paR1B2U6bvO9c22970GOmnxh0vR9g7kC7Gh2kXUfC8=
+Program.Sub.Comments.End
