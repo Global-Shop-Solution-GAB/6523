@@ -1,0 +1,439 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.Form..Create(BaseForm)
+Gui.Form..Caption("Salesperon - Territories")
+Gui.Form..Size(1028,720)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..AlwaysOnTop(False)
+Gui.Form..FontName("Tahoma")
+Gui.Form..FontSize(8.25)
+Gui.Form..ControlBox(True)
+Gui.Form..MaxButton(True)
+Gui.Form..MinButton(True)
+Gui.Form..MousePointer(0)
+Gui.Form..Moveable(True)
+Gui.Form..Sizeable(True)
+Gui.Form..ShowInTaskBar(True)
+Gui.Form..TitleBar(True)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.lbl1.Create(Label,"Salesperson (GSS Vendor)",True,125,13,0,61,8,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl1.BorderStyle(0)
+Gui.Form.txtSP.Create(TextBox,"",True,216,20,0,59,23,True,0,"Tahoma",8.25,,1)
+Gui.Form.cmdSP.Create(Button)
+Gui.Form.cmdSP.Enabled(True)
+Gui.Form.cmdSP.Visible(True)
+Gui.Form.cmdSP.Zorder(0)
+Gui.Form.cmdSP.Size(26,20)
+Gui.Form.cmdSP.Position(277,22)
+Gui.Form.cmdSP.Caption("^")
+Gui.Form.cmdSP.FontName("Tahoma")
+Gui.Form.cmdSP.FontSize(8.25)
+Gui.Form.cmdSP.Event(Click,cmdSP_Click)
+Gui.Form.lbl2.Create(Label,"Territoties",True,49,13,0,362,4,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl2.BorderStyle(0)
+Gui.Form.lbl2.DefaultValue("")
+Gui.Form.txtTerritory.Create(TextBox,"",True,215,20,0,360,21,True,0,"Tahoma",8.25,,1)
+Gui.Form.cmdTerritories.Create(Button)
+Gui.Form.cmdTerritories.Enabled(True)
+Gui.Form.cmdTerritories.Visible(True)
+Gui.Form.cmdTerritories.Zorder(0)
+Gui.Form.cmdTerritories.Size(26,20)
+Gui.Form.cmdTerritories.Position(578,21)
+Gui.Form.cmdTerritories.Caption("^")
+Gui.Form.cmdTerritories.FontName("Tahoma")
+Gui.Form.cmdTerritories.FontSize(8.25)
+Gui.Form.cmdTerritories.Event(Click,cmdTerritories_Click)
+Gui.Form.cmdAdd.Create(Button)
+Gui.Form.cmdAdd.Enabled(True)
+Gui.Form.cmdAdd.Visible(True)
+Gui.Form.cmdAdd.Zorder(0)
+Gui.Form.cmdAdd.Size(48,20)
+Gui.Form.cmdAdd.Position(609,21)
+Gui.Form.cmdAdd.Caption("Add")
+Gui.Form.cmdAdd.FontName("Tahoma")
+Gui.Form.cmdAdd.FontSize(8.25)
+Gui.Form.cmdAdd.Event(Click,cmdAdd_Click)
+Gui.Form.cmdSave.Create(Button)
+Gui.Form.cmdSave.Enabled(True)
+Gui.Form.cmdSave.Visible(True)
+Gui.Form.cmdSave.Zorder(0)
+Gui.Form.cmdSave.Size(48,20)
+Gui.Form.cmdSave.Position(971,24)
+Gui.Form.cmdSave.Caption("Save")
+Gui.Form.cmdSave.FontName("Tahoma")
+Gui.Form.cmdSave.FontSize(8.25)
+Gui.Form.cmdSave.BackColor(8454016)
+Gui.Form.cmdSave.Anchor(9)
+Gui.Form.cmdSave.Event(Click,cmdSave_Click)
+Gui.Form.GSGC_SP_Territories.Create(GsGridControl)
+Gui.Form.GSGC_SP_Territories.Enabled(True)
+Gui.Form.GSGC_SP_Territories.Visible(True)
+Gui.Form.GSGC_SP_Territories.Zorder(0)
+Gui.Form.GSGC_SP_Territories.Size(1021,642)
+Gui.Form.GSGC_SP_Territories.Position(2,47)
+Gui.Form.GSGC_SP_Territories.Event(RowCellClick,GSGC_SP_Territories_RowCellClick)
+Gui.Form.txtID.Create(TextBox,"",True,47,20,0,307,21,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtID.Event(LostFocus,txtID_LostFocus)
+Gui.Form.txtID.Event(KeyPressEnter,txtID_KeyPressEnter)
+Gui.Form.lbl3.Create(Label,"ID",True,11,13,0,309,4,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl3.BorderStyle(0)
+Gui.Form.lbl4.Create(Label,"Vendor",True,34,13,0,3,7,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl4.BorderStyle(0)
+Gui.Form.txtVendor.Create(TextBox,"",True,53,20,0,3,23,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtVendor.Event(LostFocus,txtVendor_LostFocus)
+Gui.Form.txtVendor.Event(KeyPressEnter,txtVendor_KeyPressEnter)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Bryan Pham - 11/12/2021
+'Customer: MUM INDUSTRY
+'Quote: 12952
+'Desc.: MUM Industries is needing a way to connect their salesreps (GSS Vendors) to territories (GSS Salepersons) for sales territory reporting purposes in GSS instead of running reports outside of the system.
+
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+F.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sMsg.Declare
+
+f.ODBC.Connection!con.OpenCompanyConnection
+f.Intrinsic.UI.InvokeWaitDialog("Initialize dictionaries...")
+
+'Bind Part number textbox	
+f.Data.Datatable.CreateFromSQL("dtSalesRep","con","Select VENDOR from V_VENDOR_MASTER order by VENDOR",True)
+f.Intrinsic.String.Build("Initialize Vendors - {0} records...",v.DataTable.dtSalesRep.RowCount,v.Local.sMsg)
+f.Intrinsic.UI.ChangeWaitStatus(v.Local.sMsg,3,1,10)	
+f.Data.DataTable.AddExpressionColumn("dtSalesRep","VENDORTrim","String","TRIM(VENDOR)")
+f.Data.DataTable.AddExpressionColumn("dtSalesRep","VENDORTrim2","String","VENDORTrim")
+f.Data.Dictionary.CreateFromDatatable("dSalesRep","dtSalesRep","VENDORTrim","VENDORTrim2")
+f.Data.Dictionary.SetDefaultReturn("dSalesRep","***NOTFOUND***")
+gui.Form.txtVendor.AddAutoCompleteItem("dSalesRep","Dictionary")
+f.Data.DataTable.Close("dtSalesRep")
+
+'Bind Territories textbox	
+f.Data.Datatable.CreateFromSQL("dtTerritory","con","select SALESPERSON_CODE from V_SALESPEOPLE order by SALESPERSON_CODE",True)
+f.Intrinsic.String.Build("Initialize Territories - {0} records...",v.DataTable.dtTerritory.RowCount,v.Local.sMsg)
+f.Intrinsic.UI.ChangeWaitStatus(v.Local.sMsg,3,1,10)	
+f.Data.DataTable.AddExpressionColumn("dtTerritory","SALESPERSON_CODETrim","String","TRIM(SALESPERSON_CODE)")
+f.Data.DataTable.AddExpressionColumn("dtTerritory","SALESPERSON_CODETrim2","String","SALESPERSON_CODETrim")
+f.Data.Dictionary.CreateFromDatatable("dTerritory","dtTerritory","SALESPERSON_CODETrim","SALESPERSON_CODETrim2")
+f.Data.Dictionary.SetDefaultReturn("dTerritory","***NOTFOUND***")
+gui.Form.txtID.AddAutoCompleteItem("dTerritory","Dictionary")
+f.Data.DataTable.Close("dtTerritory")
+
+f.Intrinsic.UI.CloseWaitDialog
+
+f.Intrinsic.Control.CallSub(loadDT_SP_Territories)
+gui.Form..Show
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.cmdSP_Click.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sRet.Declare
+V.Local.sTitles.Declare
+V.Local.iWidth.Declare
+F.Intrinsic.UI.SetBrowserHotTypeAhead(True)
+'salesrep (vendor) browser
+F.Intrinsic.String.Split("ID*!*Sales Rep","*!*",v.Local.sTitles)
+F.Intrinsic.String.Split("300*!*1000","*!*",V.Local.iWidth)
+
+F.Intrinsic.UI.Browser("Select Sales Rep","con","select VENDOR, NAME_VENDOR from V_VENDOR_MASTER order by VENDOR",V.Local.sTitles,V.Local.iWidth,V.Local.sRet)
+f.Intrinsic.Control.If(v.Local.sRet,<>,"***CANCEL***")
+	f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	gui.Form.txtVendor.Text(v.Local.sRet(0))
+	gui.Form.txtSP.Text(v.Local.sRet(1))
+f.Intrinsic.Control.EndIf
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdSP_Click.End
+
+Program.Sub.cmdAdd_Click.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSP.Declare
+v.Local.sTerritory.Declare
+v.Local.sVendor.Declare
+v.Local.sID.Declare
+v.Local.sFilter.Declare
+
+	v.Local.sVendor.Set(v.Screen.Form!txtVendor.Text)
+	v.Local.sSP.Set(v.Screen.Form!txtSP.Text)
+	
+	v.Local.sTerritory.Set(v.Screen.Form!txtTerritory.Text)
+	v.Local.sID.Set(v.Screen.Form!txtID.Text)
+	
+	f.Intrinsic.String.Build("VENDOR = '{0}' and SALESPERSON = '{1}'",v.Local.sVendor,v.Local.sID,v.Local.sFilter)
+	f.Data.DataView.Create("dtSP_Territories","dvSP_Territories",22,v.Local.sFilter,"")
+'Check if the selection already exists
+	f.Intrinsic.Control.If(v.DataView.dtSP_Territories!dvSP_Territories.RowCount,>,0)
+		f.Intrinsic.UI.Msgbox("Selection already exists.")
+'if it doesnt, add to datatable
+	f.Intrinsic.Control.Else
+		f.Data.DataTable.AddRow("dtSP_Territories","VENDOR",v.Local.sVendor,"VENDOR_NAME",v.Local.sSP,"SALESPERSON",v.Local.sID,"SP_NAME",v.Local.sTerritory)
+	f.Intrinsic.Control.EndIf
+	f.Data.DataView.Close("dtSP_Territories","dvSP_Territories")
+'clear out the text fields	
+	gui.Form.txtSP.Text("")
+	gui.Form.txtTerritory.Text("")
+	gui.Form.txtID.Text("")
+	gui.Form.txtVendor.Text("")
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub("Unload")
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdAdd_Click.End
+
+Program.Sub.cmdTerritories_Click.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sRet.Declare
+V.Local.sTitles.Declare
+V.Local.iWidth.Declare
+F.Intrinsic.UI.SetBrowserHotTypeAhead(True)
+'territory browser
+F.Intrinsic.String.Split("ID*!*Territory","*!*",v.Local.sTitles)
+F.Intrinsic.String.Split("300*!*1000","*!*",V.Local.iWidth)
+
+F.Intrinsic.UI.Browser("Select Territory","con","select SALESPERSON_CODE, RTRIM(SALESPERSON) as SALESPERSON from V_SALESPEOPLE order by SALESPERSON_CODE",V.Local.sTitles,V.Local.iWidth,V.Local.sRet)
+f.Intrinsic.Control.If(v.Local.sRet,<>,"***CANCEL***")
+	f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	gui.Form.txtID.Text(v.Local.sRet(0))
+	gui.Form.txtTerritory.Text(v.Local.sRet(1))
+f.Intrinsic.Control.EndIf
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdTerritories_Click.End
+
+Program.Sub.cmdSave_Click.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+'save data to custom table
+f.Intrinsic.UI.InvokeWaitDialog("Saving...")
+f.ODBC.Connection!con.Execute("Delete from GCG_6523_SP_TERRITORIES")
+f.Data.DataTable.SaveToDB("dtSP_Territories","con","GCG_6523_SP_TERRITORIES","",128,"VENDOR@!@VENDOR*!*VENDOR_NAME@!@VENDOR_NAME*!*SALESPERSON@!@SALESPERSON*!*SP_NAME@!@SP_NAME")
+f.Intrinsic.UI.CloseWaitDialog
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub("Unload")
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdSave_Click.End
+
+Program.Sub.loadDT_SP_Territories.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSQL.Declare
+
+f.Intrinsic.Control.If(v.DataTable.dtPL.Exists,=,true)
+	f.Data.Datatable.Close("dtSP_Territories")
+f.Intrinsic.Control.EndIf
+
+f.Data.Datatable.CreateFromSQL("dtSP_Territories","con","Select RTRIM(VENDOR) as VENDOR, RTRIM(VENDOR_NAME) as VENDOR_NAME, RTRIM(SALESPERSON) as SALESPERSON, RTRIM(SP_NAME) as SP_NAME from GCG_6523_SP_TERRITORIES order by VENDOR, SALESPERSON",true)
+f.Data.DataTable.AddColumn("dtSP_Territories","Delete","string","Delete")
+
+f.Intrinsic.Control.CallSub(loadGV_SP_Territories)
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.loadDT_SP_Territories.End
+
+Program.Sub.loadGV_SP_Territories.Start
+F.Intrinsic.Control.Try
+V.Local.sError.Declare
+
+gui.Form.GSGC_SP_Territories.AddGridviewFromDatatable("gvSP_Territories","dtSP_Territories")
+gui.Form.GSGC_SP_Territories.SuspendLayout()
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","Caption","Sales Rep")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","AllowEdit","False")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","MinWidth","40")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","HeaderFontBold","True")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","HeaderHAlignment","Center")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR","CellHAlignment","Center")
+
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","Caption","Sales Rep Name")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","AllowEdit","False")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","MinWidth","70")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","HeaderFontBold","True")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","HeaderHAlignment","Center")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","VENDOR_NAME","CellHAlignment","Center")
+
+'gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","Visible","False")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","Caption","Territory ID")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","AllowEdit","False")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","MinWidth","70")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","HeaderFontBold","True")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","HeaderHAlignment","Center")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SALESPERSON","CellHAlignment","Center")
+
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","Caption","Territory")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","AllowEdit","False")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","MinWidth","40")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","HeaderFontBold","True")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","HeaderHAlignment","Center")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","SP_NAME","CellHAlignment","Center")
+
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","MinWidth","30")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","ReadOnly",True)
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","AllowEdit",False)
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","HeaderFontBold","True")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","CellHAlignment","Center")
+gui.Form.GSGC_SP_Territories.ColumnEdit("gvSP_Territories","Delete","EditorButton","Delete")
+gui.Form.GSGC_SP_Territories.SetColumnProperty("gvSP_Territories","Delete","HeaderHAlignment","Center")
+gui.Form.GSGC_SP_Territories.ResumeLayout()
+gui.Form.GSGC_SP_Territories.MainView("gvSP_Territories")
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.loadGV_SP_Territories.End
+
+Program.Sub.GSGC_SP_Territories_RowCellClick.Start
+f.Intrinsic.Control.Try
+	v.Local..BulkDeclareString(sError)
+	
+	f.Intrinsic.Control.If(v.Args.Column,=,"Delete")
+		f.Intrinsic.UI.InvokeWaitDialog("Deleting...")
+		f.Data.DataTable.DeleteRow("dtSP_Territories",v.Args.RowIndex)
+		f.Data.DataTable.AcceptChanges("dtSP_Territories")
+		f.Intrinsic.UI.CloseWaitDialog		
+	f.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub("Unload")
+F.Intrinsic.Control.EndTry
+Program.Sub.GSGC_SP_Territories_RowCellClick.End
+
+Program.Sub.Form_UnLoad.Start
+v.Local.sRet.Declare
+'Remind customer if they havent save selections
+f.Intrinsic.UI.Msgbox("Have you saved all selections? All selections will be lost if you have not saved.","Attention!",4,v.Local.sRet)
+f.Intrinsic.Control.If(v.Local.sRet,=,"6")
+	f.Intrinsic.Control.CallSub("Unload")
+f.Intrinsic.Control.EndIf
+Program.Sub.Form_UnLoad.End
+
+Program.Sub.Unload.Start
+f.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	f.Intrinsic.Control.If(v.ODBC.con.State,=,1)
+		F.ODBC.Connection!con.close
+	f.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.End
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Unload.End
+
+Program.Sub.txtVendor_LostFocus.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSQL.Declare
+v.Local.sRet.Declare
+v.Local.sVendor.Declare
+
+v.Local.sVendor.Set(v.Screen.Form!txtVendor.Text)
+f.Intrinsic.String.Build("Select RTRIM(NAME_VENDOR) as VENDOR_NAME from V_VENDOR_MASTER where VENDOR = '{0}'",v.Local.sVendor.UCase,v.Local.sSQL)
+f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+
+gui.Form.txtSP.Text(v.Local.sRet)
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.txtVendor_LostFocus.End
+
+Program.Sub.txtID_LostFocus.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSQL.Declare
+v.Local.sRet.Declare
+v.Local.sSP.Declare
+
+v.Local.sSP.Set(v.Screen.Form!txtID.Text)
+f.Intrinsic.String.Build("Select RTRIM(SALESPERSON) as SALESPERSON from V_SALESPEOPLE where SALESPERSON_CODE = '{0}'",v.Local.sSP,v.Local.sSQL)
+f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+
+gui.Form.txtTerritory.Text(v.Local.sRet)
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.txtID_LostFocus.End
+
+Program.Sub.txtVendor_KeyPressEnter.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSQL.Declare
+v.Local.sRet.Declare
+v.Local.sVendor.Declare
+
+v.Local.sVendor.Set(v.Screen.Form!txtVendor.Text)
+f.Intrinsic.String.Build("Select RTRIM(NAME_VENDOR) as VENDOR_NAME from V_VENDOR_MASTER where VENDOR = '{0}'",v.Local.sVendor.UCase,v.Local.sSQL)
+f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+
+gui.Form.txtSP.Text(v.Local.sRet)
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.txtVendor_KeyPressEnter.End
+
+Program.Sub.txtID_KeyPressEnter.Start
+f.Intrinsic.Control.Try
+V.Local.sError.Declare
+v.Local.sSQL.Declare
+v.Local.sRet.Declare
+v.Local.sSP.Declare
+
+v.Local.sSP.Set(v.Screen.Form!txtID.Text)
+f.Intrinsic.String.Build("Select RTRIM(SALESPERSON) as SALESPERSON from V_SALESPEOPLE where SALESPERSON_CODE = '{0}'",v.Local.sSP,v.Local.sSQL)
+f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+
+gui.Form.txtTerritory.Text(v.Local.sRet)
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}GAB Version: {5}}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.txtID_KeyPressEnter.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$bpham$}$20211119083202072$}$Di0riF4Q5RIv6jxva5zSWDOOsXP37Nsov/bqn1omaF4PKh2/5ilnpUVAFzjbyUYhEtqRiER0vOk=
+Program.Sub.Comments.End
